@@ -55,14 +55,13 @@ struct ChatHistoryListView: View {
         if #available(iOS 15, *) {
             ForEach(chatItems, id: \.roomID) { item in
                 chatRow(for: item) // 为每个聊天室构建行视图
-                    .swipeActions(edge: .trailing, allowsFullSwipe: false) { // 添加滑动操作
-                        Button {
-                            itemToDelete = item
-                            showingDeleteAlert = true // 显示删除确认弹窗
+                    .swipeActions(edge: .leading, allowsFullSwipe: true) { // 添加滑动操作
+                        Button(role: .destructive) {
+                            // 直接删除聊天室，而不是显示弹窗
+                            deleteChat(item: item)
                         } label: {
                             Label("Delete".localized(), systemImage: "trash")
                         }
-                        .tint(.red)
                     }
             }
             .onDelete(perform: deleteChat) // 支持列表删除操作
@@ -101,7 +100,7 @@ struct ChatHistoryListView: View {
                             .foregroundColor(.white)
                             .padding([.top, .bottom], 3)
                             .padding([.leading, .trailing], 4)
-                            .background(Color.red.opacity(0.8))
+                            .background(Color.gray.opacity(0.8))
                             .clipShape(Capsule())
                     }
                     

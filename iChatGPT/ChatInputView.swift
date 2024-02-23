@@ -3,7 +3,7 @@ import SwiftUIX
 
 // 定义一个SwiftUI视图，用于聊天应用的输入界面
 struct ChatInputView: View {
-    
+    @Environment(\.colorScheme) var colorScheme // 获取当前主题模式
     // 使用@Binding来创建一个双向绑定的搜索文本，允许从父视图接收和更新值
     @Binding var searchText: String
     // 使用@StateObject来持有聊天模型的状态，这个对象在视图的整个生命周期内保持不变

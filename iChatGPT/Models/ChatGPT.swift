@@ -10,9 +10,9 @@ import Foundation
 import Combine
 import OpenAI
 
-let kDeafultAPIHost = "api.openai.com"
+let kDeafultAPIHost = "api.shensi.co"
 let kDeafultAPITimeout = 60.0
-let kAPIModels = [Model.gpt3_5Turbo, Model.gpt4, Model.gpt4_32k, Model.gpt4_32k_0314, Model.gpt4_32k_0613, Model.gpt3_5Turbo_16k, Model.gpt3_5Turbo_16k_0613]
+let kAPIModels = [Model.gpt3_5Turbo, Model.gpt4, Model.gpt4_32k, Model.gpt4_32k_0613, Model.gpt3_5Turbo_16k, Model.gpt3_5Turbo_16k_0613]
 
 class Chatbot {
     var timeout: TimeInterval = 60 // API请求的超时时间，默认为60秒

@@ -14,75 +14,100 @@ struct AIChatView: View {
     @StateObject private var chatModel = AIChatModel(roomID: ChatRoomStore.shared.lastRoomId()) // 聊天模型，管理聊天数据
     @StateObject private var inputModel = AIChatInputModel() // 输入模型，管理用户输入
     @StateObject private var shareContent = ShareContent() // 分享内容模型，管理分享的内容
+    @State private var isSidebarPresented: Bool = false
+    
+    @Environment(\.colorScheme) var colorScheme // 获取当前主题模式
     
     // 主体视图
     var body: some View {
-        NavigationView {
-            VStack {
-                chatList // 聊天列表视图
-                Spacer() // 空白填充，用于调整布局
-                ChatInputView(searchText: $inputModel.searchText, chatModel: chatModel) // 聊天输入视图
-                    .padding([.leading, .trailing], 12) // 为输入视图添加左右内边距
-            }
-            .markdownHeadingStyle(.custom) // 自定义Markdown标题样式
-            .markdownQuoteStyle(.custom) // 自定义Markdown引用样式
-            .markdownCodeStyle(.custom) // 自定义Markdown代码样式
-            .markdownInlineCodeStyle(.custom) // 自定义Markdown行内代码样式
-            .markdownOrderedListBulletStyle(.custom) // 自定义Markdown有序列表样式
-            .markdownUnorderedListBulletStyle(.custom) // 自定义Markdown无序列表样式
-            .markdownImageStyle(.custom) // 自定义Markdown图片样式
-            .navigationBarTitleDisplayMode(.inline) // 导航栏标题显示模式设为内联
-            .navigationBarItems(trailing: addButton) // 导航栏添加按钮
-            // 设置视图、聊天历史视图、聊天室配置视图、分享视图的展示逻辑
-            .sheet(isPresented: $isSettingsPresented) {
-                ChatAPISettingView(isKeyPresented: $isSettingsPresented, chatModel: chatModel)
-            }
-            .sheet(isPresented: $inputModel.isShowAllChatRoom) {
-                ChatHistoryListView(isKeyPresented: $inputModel.isShowAllChatRoom, chatModel: chatModel, onComplete: { roomID in
-                    if roomID != chatModel.roomID {
-                        chatModel.resetRoom(roomID)
-                        chatModel.isScrollListBottom.toggle()
-                    }
-                })
-            }
-            .sheet(isPresented: $inputModel.isConfigChatRoom) {
-                ChatRoomConfigView(isKeyPresented: $inputModel.isConfigChatRoom, chatModel: chatModel)
-            }
-            .sheet(isPresented: $isSharing) {
-                ActivityView(activityItems: $shareContent.activityItems)
-            }
-            // 警告弹窗的展示逻辑，包括新建聊天室、重新加载最后一个问题、清除所有问题、分享内容等
-            .alert(isPresented: $inputModel.showingAlert) {
-                switch inputModel.activeAlert {
-                case .createNewChatRoom:
-                    return CreateNewChatRoom()
-                case .reloadLastQuestion:
-                    return ReloadLastQuestion()
-                case .clearAllQuestion:
-                    return ClearAllQuestion()
-                case .shareContents:
-                    return ShareContents()
-                }
-            }
-            // 监听滚动到聊天室顶部的状态变化
-            .onChange(of: inputModel.isScrollToChatRoomTop) { _ in
-                isScrollListTop.toggle()
-            }
-            // 工具栏配置，显示ChatGPT的图标和标题
-            .toolbar {
-                ToolbarItem(placement: .principal) {
-                    HStack {
-                        Image("chatgpt").resizable()
-                            .frame(width: 25, height: 25)
-                        Text("ChatGPT").font(.headline)
-                    }
-                }
-            }
-        }
-        .background(Color.white)
+        GeometryReader { geometry in // 使用GeometryReader获取当前视图的尺寸
+            ZStack { // 使用ZStack以便可以在主内容区域上方添加遮罩
+                HStack(spacing: 0) { // 使用HStack将侧边栏和主内容区域并排布局
+                    // 侧边栏视图
+                    SidebarView()
+                        .frame(width: isSidebarPresented ? 300 : 0) // 根据侧边栏状态动态调整宽度
+                        .animation(.default, value: isSidebarPresented) // 添加动画效果
+                        .foregroundColor(colorScheme == .dark ? .white : .black) // 根据主题模式设置前景色（图标颜色）
+                    
+                    // 主内容区域{
+                    NavigationView {
+                        VStack {
+                            chatList // 聊天列表视图
+                            Spacer() // 空白填充，用于调整布局
+                            ChatInputView(searchText: $inputModel.searchText, chatModel: chatModel) // 聊天输入视图
+                                .padding([.leading, .trailing], 12) // 为输入视图添加左右内边距
+                            
+                        }
+                        // 添加遮罩层
+                        .overlay(
+                            // 当侧边栏展开时，显示遮罩
+                            isSidebarPresented ? Color.gray.opacity(0.5).edgesIgnoringSafeArea(.all) : nil
+                        )
+                        .markdownHeadingStyle(.custom) // 自定义Markdown标题样式
+                        .markdownQuoteStyle(.custom) // 自定义Markdown引用样式
+                        .markdownCodeStyle(.custom) // 自定义Markdown代码样式
+                        .markdownInlineCodeStyle(.custom) // 自定义Markdown行内代码样式
+                        .markdownOrderedListBulletStyle(.custom) // 自定义Markdown有序列表样式
+                        .markdownUnorderedListBulletStyle(.custom) // 自定义Markdown无序列表样式
+                        .markdownImageStyle(.custom) // 自定义Markdown图片样式
+                        .navigationBarTitleDisplayMode(.inline) // 导航栏标题显示模式设为内联
+                        .navigationBarItems(trailing: addButton) // 导航栏添加按钮
+                        // 设置视图、聊天历史视图、聊天室配置视图、分享视图的展示逻辑
+                        .sheet(isPresented: $isSettingsPresented) {
+                            ChatAPISettingView(isKeyPresented: $isSettingsPresented, chatModel: chatModel)
+                        }
+                        .sheet(isPresented: $inputModel.isConfigChatRoom) {
+                            ChatRoomConfigView(isKeyPresented: $inputModel.isConfigChatRoom, chatModel: chatModel)
+                        }
+                        .sheet(isPresented: $isSharing) {
+                            ActivityView(activityItems: $shareContent.activityItems)
+                        }
+                        // 警告弹窗的展示逻辑，包括新建聊天室、重新加载最后一个问题、清除所有问题、分享内容等
+                        .alert(isPresented: $inputModel.showingAlert) {
+                            switch inputModel.activeAlert {
+                            case .createNewChatRoom:
+                                return CreateNewChatRoom()
+                            case .reloadLastQuestion:
+                                return ReloadLastQuestion()
+                            case .clearAllQuestion:
+                                return ClearAllQuestion()
+                            case .shareContents:
+                                return ShareContents()
+                            }
+                        }
+                        // 监听滚动到聊天室顶部的状态变化
+                        .onChange(of: inputModel.isScrollToChatRoomTop) { _ in
+                            isScrollListTop.toggle()
+                        }
+                        // 工具栏配置，显示ChatGPT的图标和标题
+                        .toolbar {
+                            ToolbarItem(placement: .principal) {
+                                HStack {
+                                    Image("chatgpt").resizable()
+                                        .frame(width: 25, height: 25)
+                                    Text("DoNotGPT").font(.headline)
+                                }
+                            }
+                        }
 
-        .navigationViewStyle(.stack) // 导航视图样式设为堆栈式
-        .environmentObject(inputModel) // 将inputModel作为环境对象传递给子视图
+                    }
+                    //        .background(Color.white)
+                    
+                    .navigationViewStyle(.stack) // 导航视图样式设为堆栈式
+                    .environmentObject(inputModel) // 将inputModel作为环境对象传递给子视图
+                    .frame(width: geometry.size.width) // 主内容区域的宽度保持不变
+                    .animation(.default, value: isSidebarPresented) // 添加动画效果
+                }
+            }
+            .gesture(DragGesture().onEnded { value in
+                // 根据手势滑动方向展开或收起侧边栏
+                if value.translation.width > 100 {
+                    isSidebarPresented = true
+                } else if value.translation.width < -100 {
+                    isSidebarPresented = false
+                }
+            })
+        }
     }
     
     // 聊天列表视图构建
@@ -108,7 +133,7 @@ struct AIChatView: View {
                             IconAvatarImageView(name: item.model.hasPrefix("gpt-4") ? "chatgpt-icon-4" : "chatgpt-icon")
                             
                             VStack(alignment: .leading) {
-                                Text("ChatGPT")
+                                Text("DoNotGPT")
                                     .bold()
                                 if item.isResponse {
                                     MarkdownText(item.answer ?? "")
@@ -130,11 +155,12 @@ struct AIChatView: View {
                     }
                     .listRowSeparator(.hidden) // 隐藏分割线 (iOS 15+)
                 }
-//                .listRowBackground(Color.clear) // 设置每行的背景为透明
+                .listRowBackground(Color.clear) // 设置每行的背景为透明
                 
                 
             }
             .listStyle(InsetGroupedListStyle()) // 列表样式设为内嵌分组列表样式
+            .background(Color.white) // 直接在List上设置背景色为白色
             // 监听是否需要滚动到列表底部
             .onChange(of: chatModel.isScrollListBottom) { _ in
                 if let lastId = chatModel.contents.last?.datetime {
@@ -146,6 +172,7 @@ struct AIChatView: View {
                     }
                 }
             }
+            
             // 监听是否需要滚动到列表顶部
             .onChange(of: isScrollListTop) { _ in
                 if let firstId = chatModel.contents.first?.datetime {
@@ -159,7 +186,7 @@ struct AIChatView: View {
     }
     
     // 设置按钮视图
-    @Environment(\.colorScheme) var colorScheme // 获取当前的主题模式
+//    @Environment(\.colorScheme) var colorScheme // 获取当前的主题模式
     private var addButton: some View {
         
         Button(action: {
@@ -172,8 +199,8 @@ struct AIChatView: View {
                     Image(systemName: "gear").imageScale(.large)
                 }
             }.foregroundColor(colorScheme == .dark ? .white : .black) // 根据主题模式设置前景色（图标颜色）
-            .frame(height: 40)
-            .padding(.trailing, 5)
+                .frame(height: 40)
+                .padding(.trailing, 5)
         }
     }
 }

@@ -18,7 +18,7 @@ struct ChatAPISettingView: View {
     // 定义设置相关的状态变量
     @State private var selectedModel: Int = 0 // 选择的API模型索引
     @State private var apiHost = kDeafultAPIHost // API主机地址
-    @State private var apiKey = "NKt5fonF0F563xye73D7D329E72749F49473FeA3C33b0e13" // API密钥
+    @State private var apiKey = "" // API密钥
     @State private var maskedAPIKey = "" // 脱敏后显示的API密钥
     @State private var apiTimeout = "\(Int(kDeafultAPITimeout))" // API超时设置
     @State private var isStreamOutput = true // 是否使用流输出
@@ -74,25 +74,6 @@ struct ChatAPISettingView: View {
                     }
                 }
                 
-                Section(header: Text("API Host".localized())) {
-                    TextField("For example: ".localized() + kDeafultAPIHost, text: $apiHost)
-                    if !apiHostError.isEmpty {
-                        HStack {
-                            Text(apiHostError)
-                                .foregroundColor(.red)
-                                
-                            Spacer()
-                            
-                            Button(action: {
-                                apiHost = kDeafultAPIHost
-                            }) {
-                                Text("Use Default".localized())
-                                    .foregroundColor(.blue)
-                                    .font(.footnote)
-                            }
-                        }
-                    }
-                }
                 
                 Section(header: Text("API Key".localized())) {
                     TextField("Please enter OpenAI Key".localized(), text: $apiKey)
@@ -232,18 +213,6 @@ struct ChatAPISettingView: View {
                             .font(.footnote)
                             .foregroundColor(.gray)
                             .padding(.bottom, 10)
-
-//                        Text(.init("Developer: 37 Mobile iOS Tech Team\nGitHub: https://github.com/37iOS/iChatGPT".localized()))
-//                            .font(.footnote)
-//                            .foregroundColor(.secondary)
-//                            .multilineTextAlignment(.center)
-//                            .padding(.bottom, 10)
-//                        显示开发者信息、GitHub链接和贡献者信息
-//                        Text("Contributors：[@iHTCboy](https://github.com/iHTCboy) | [@AlphaGogoo](https://github.com/AlphaGogoo) | [@RbBtSn0w](https://github.com/RbBtSn0w) | [@0xfeedface1993](https://github.com/0xfeedface1993)")
-//                            .font(.footnote)
-//                            .foregroundColor(.secondary)
-//                            .multilineTextAlignment(.center)
-//                            .padding(.bottom, 25)
                     }
                 }
                 .frame(maxHeight: 120)
