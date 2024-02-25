@@ -86,6 +86,7 @@ struct AIChatView: View {
                                     Image("chatgpt").resizable()
                                         .frame(width: 25, height: 25)
                                     Text("DoNotGPT").font(.headline)
+
                                 }
                             }
                         }

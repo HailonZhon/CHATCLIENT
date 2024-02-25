@@ -177,6 +177,7 @@
 				6D5C55682944317300FCF891 /* Info.plist */,
 				6D37A73D29C6D76800EF1F7B /* Localizable.strings */,
 				6DC88AE32942C8AE00DA6C55 /* Preview Content */,
+				D98542452B88A733005E94BE /* SidebarView.swift */,
 			);
 			path = iChatGPT;
 			sourceTree = "<group>";

@@ -35,15 +35,14 @@ struct SidebarView: View {
                         .foregroundColor(.blue)
                     // 个人信息按钮
                     Button(action: {
+                       // 当按钮被点击时，显示弹窗
+//                        self.isAlertPresented = true
                         isSettingsPresented.toggle()
                     }) {
-                        Text("个人信息")
+                       Text("个人信息")
                             .background(Color.clear)
                             .cornerRadius(10)
                             .foregroundColor(colorScheme == .dark ? Color.white : Color.black) // 根据主题变色
-                    }
-                    .sheet(isPresented: $isSettingsPresented) {
-                        ChatAPISettingView(isKeyPresented: $isSettingsPresented, chatModel: chatModel)
                     }
                     Spacer()
                 }
